@@ -1,4 +1,4 @@
-# Map Photo App
+# Map_king
 
 Flutter app for taking photos and placing them as markers on OpenStreetMap.
 
