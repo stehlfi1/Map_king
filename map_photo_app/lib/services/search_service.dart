@@ -47,7 +47,7 @@ class SearchService {
         final List<dynamic> jsonList = json.decode(response.body);
         return jsonList
             .map((json) => SearchResult.fromJson(json))
-            .where((result) => result.displayName.isNotEmpty)
+            .where((result) => result.isValid)
             .toList();
       } else {
         throw Exception('Search failed with status: ${response.statusCode}');
@@ -106,7 +106,7 @@ class SearchService {
         } else if (jsonResponse is List) {
           return jsonResponse
               .map((json) => SearchResult.fromJson(json))
-              .where((result) => result.displayName.isNotEmpty)
+              .where((result) => result.isValid)
               .toList();
         }
       }

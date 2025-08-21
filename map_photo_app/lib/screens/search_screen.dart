@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/search_result.dart';
 import '../services/search_service.dart';
+import '../constants/app_constants.dart';
+import '../styles/app_styles.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -36,7 +38,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onSearchChanged() {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+    _debounceTimer = Timer(const Duration(milliseconds: AppConstants.debounceDelayMs), () {
       _performSearch(_searchController.text);
     });
   }
@@ -67,7 +69,7 @@ class _SearchScreenState extends State<SearchScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Search failed. Please try again.';
+          _errorMessage = AppConstants.searchFailedMessage;
           _isLoading = false;
           _searchResults = [];
         });
@@ -91,21 +93,18 @@ class _SearchScreenState extends State<SearchScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Container(
-          height: 45,
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(25),
-          ),
+          height: AppConstants.searchBarHeight,
+          decoration: AppStyles.searchBarDecoration,
           child: TextField(
             controller: _searchController,
             focusNode: _focusNode,
             decoration: InputDecoration(
               hintText: 'Search places...',
-              hintStyle: TextStyle(color: Colors.grey[500]),
-              prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
+              hintStyle: AppStyles.lightGreyText(context),
+              prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.clear, color: Colors.grey[500]),
+                      icon: Icon(Icons.clear, color: Colors.grey.shade500),
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
@@ -116,7 +115,10 @@ class _SearchScreenState extends State<SearchScreen> {
                     )
                   : null,
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.largePadding, 
+                vertical: AppConstants.compactPadding
+              ),
             ),
           ),
         ),
@@ -125,25 +127,22 @@ class _SearchScreenState extends State<SearchScreen> {
         children: [
           if (_isLoading)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: AppStyles.standardPadding,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: AppConstants.mediumIconSize,
+                    height: AppConstants.mediumIconSize,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
+                      strokeWidth: AppConstants.circularProgressStrokeWidth,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  AppStyles.standardHorizontalSpace,
                   Text(
                     'Searching...',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    style: AppStyles.subtitleText(context),
                   ),
                 ],
               ),
@@ -151,18 +150,15 @@ class _SearchScreenState extends State<SearchScreen> {
           
           if (_errorMessage.isNotEmpty)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: AppStyles.standardPadding,
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
-                  const SizedBox(width: 12),
+                  Icon(Icons.error_outline, color: Colors.red.shade600, size: AppConstants.mediumIconSize),
+                  AppStyles.standardHorizontalSpace,
                   Expanded(
                     child: Text(
                       _errorMessage,
-                      style: TextStyle(
-                        color: Colors.red.shade600,
-                        fontSize: 14,
-                      ),
+                      style: AppStyles.errorText(context),
                     ),
                   ),
                 ],
@@ -175,7 +171,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 : ListView.separated(
                     itemCount: _searchResults.length,
                     separatorBuilder: (context, index) => Divider(
-                      height: 1,
+                      height: AppConstants.dividerHeight,
                       color: Colors.grey.shade200,
                     ),
                     itemBuilder: (context, index) {
@@ -196,25 +192,18 @@ class _SearchScreenState extends State<SearchScreen> {
         children: [
           Icon(
             Icons.search,
-            size: 64,
+            size: AppConstants.extraLargeIconSize,
             color: Colors.grey.shade400,
           ),
-          const SizedBox(height: 16),
+          AppStyles.largeVerticalSpace,
           Text(
             'Search for places',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade600,
-            ),
+            style: AppStyles.largeTitle.copyWith(color: Colors.grey.shade600),
           ),
-          const SizedBox(height: 8),
+          AppStyles.smallVerticalSpace,
           Text(
             'Find restaurants, landmarks, cities, and more',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
+            style: AppStyles.subtitleText(context).copyWith(color: Colors.grey.shade500),
             textAlign: TextAlign.center,
           ),
         ],
@@ -225,40 +214,34 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildSearchResultTile(SearchResult result) {
     return ListTile(
       leading: Container(
-        width: 40,
-        height: 40,
+        width: AppConstants.listTileIconSize,
+        height: AppConstants.listTileIconSize,
         decoration: BoxDecoration(
           color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppConstants.listTileIconSize / 2),
         ),
         child: Icon(
           _getIconForType(result.type),
           color: Colors.blue.shade600,
-          size: 20,
+          size: AppConstants.mediumIconSize,
         ),
       ),
       title: Text(
         result.shortName,
-        style: const TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 16,
-        ),
-        maxLines: 1,
+        style: AppStyles.listTileTitle,
+        maxLines: AppConstants.maxLinesSingle,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
         result.subtitle.isNotEmpty ? result.subtitle : result.displayName,
-        style: TextStyle(
-          color: Colors.grey.shade600,
-          fontSize: 13,
-        ),
-        maxLines: 2,
+        style: AppStyles.listTileSubtitle(context),
+        maxLines: AppConstants.maxLinesDouble,
         overflow: TextOverflow.ellipsis,
       ),
       trailing: const Icon(
         Icons.north_west,
         color: Colors.grey,
-        size: 20,
+        size: AppConstants.mediumIconSize,
       ),
       onTap: () => _selectResult(result),
     );

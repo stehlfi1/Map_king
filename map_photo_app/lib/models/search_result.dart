@@ -26,6 +26,11 @@ class SearchResult {
     );
   }
 
+  /// Validates if this search result is valid (has required data)
+  bool get isValid {
+    return displayName.isNotEmpty && latitude != 0.0 && longitude != 0.0;
+  }
+
   String get shortName {
     if (address['name'] != null && address['name'].toString().isNotEmpty) {
       return address['name'];

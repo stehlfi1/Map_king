@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../services/storage_service.dart';
+import '../constants/app_constants.dart';
+import '../styles/app_styles.dart';
+import '../widgets/custom_floating_action_button.dart';
+import '../utils/snackbar_helper.dart';
+import 'debug_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final bool showCoordinates;
@@ -44,9 +48,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context, {
-              'showCoordinates': _showCoordinatesInInfo,
-              'defaultZoom': double.parse(_defaultMapZoom),
-              'enableHaptics': _enableHaptics,
+              AppConstants.showCoordinatesKey: _showCoordinatesInInfo,
+              AppConstants.defaultZoomKey: double.parse(_defaultMapZoom),
+              AppConstants.enableHapticsKey: _enableHaptics,
             });
           },
         ),
@@ -122,10 +126,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: Icons.info,
                 onTap: () => _showAbout(),
               ),
+              _buildTile(
+                title: 'Storage Debug',
+                subtitle: 'View storage status and diagnostics',
+                icon: Icons.bug_report,
+                iconColor: Colors.orange,
+                onTap: () => _openDebugScreen(),
+              ),
             ],
           ),
           
-          const SizedBox(height: 50),
+          const SizedBox(height: AppConstants.extraLargeIconSize),
         ],
       ),
     );
@@ -136,29 +147,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          padding: const EdgeInsets.fromLTRB(
+            AppConstants.standardPadding, 
+            AppConstants.largePadding, 
+            AppConstants.standardPadding, 
+            AppConstants.fabSpacing
+          ),
           child: Text(
             title,
-            style: TextStyle(
-              fontSize: 14,
+            style: AppStyles.mediumText.copyWith(
               fontWeight: FontWeight.w600,
               color: Colors.grey[600],
             ),
           ),
         ),
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
+          margin: const EdgeInsets.symmetric(horizontal: AppConstants.standardPadding),
+          decoration: AppStyles.settingsCardShadow,
           child: Column(children: children),
         ),
       ],
@@ -173,17 +178,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: (iconColor ?? Colors.blue).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          color: iconColor ?? Colors.blue,
-          size: 20,
-        ),
+      leading: IconContainer(
+        icon: icon,
+        iconColor: iconColor,
       ),
       title: Text(title),
       subtitle: Text(subtitle),
@@ -200,17 +197,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required IconData icon,
   }) {
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          color: Colors.blue,
-          size: 20,
-        ),
+      leading: IconContainer(
+        icon: icon,
       ),
       title: Text(title),
       subtitle: Text(subtitle),
@@ -226,12 +214,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
+        padding: AppStyles.standardPadding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Default Zoom Level', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
+            const Text('Default Zoom Level', style: AppStyles.largeTitle),
+            AppStyles.largeVerticalSpace,
             ...['8.0', '10.0', '12.0', '14.0', '16.0'].map((zoom) =>
               ListTile(
                 title: Text('${zoom} ${zoom == '8.0' ? '(Far)' : zoom == '16.0' ? '(Close)' : ''}'),
@@ -269,9 +257,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pop(context);
               await StorageService.clearAllData();
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('All data cleared successfully')),
-                );
+                SnackBarHelper.showSuccess(context, 'All data cleared successfully');
                 Navigator.pop(context); // Return to main screen
               }
             },
@@ -294,20 +280,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Q: How do I add photos to the map?', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('A: Tap the blue camera button and choose to take a photo or select from gallery. Photos are placed at the red crosshair location.\n'),
+              Text('Q: How do I add photos to the map?', style: AppStyles.boldTitle),
+              Text('A: Tap the blue camera button and choose to take a photo or select from gallery. Photos are placed at the red crosshair location.\n', style: AppStyles.standardText),
               
-              Text('Q: Why don\'t I see my current location?', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('A: Make sure you\'ve granted location permission. Tap the location button and allow access in Settings.\n'),
+              Text('Q: Why don\'t I see my current location?', style: AppStyles.boldTitle),
+              Text('A: Make sure you\'ve granted location permission. Tap the location button and allow access in Settings.\n', style: AppStyles.standardText),
               
-              Text('Q: Can I move existing photos?', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('A: Currently, photos cannot be moved. You can delete and re-add them at a new location.\n'),
+              Text('Q: Can I move existing photos?', style: AppStyles.boldTitle),
+              Text('A: Currently, photos cannot be moved. You can delete and re-add them at a new location.\n', style: AppStyles.standardText),
               
-              Text('Q: How do I view my photos?', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('A: Tap any photo marker on the map to view the full image and details.\n'),
+              Text('Q: How do I view my photos?', style: AppStyles.boldTitle),
+              Text('A: Tap any photo marker on the map to view the full image and details.\n', style: AppStyles.standardText),
               
-              Text('Q: Are my photos backed up?', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('A: Photos are stored locally on your device. Enable auto-backup in Settings for cloud storage.\n'),
+              Text('Q: Are my photos backed up?', style: AppStyles.boldTitle),
+              Text('A: Photos are stored locally on your device. Enable auto-backup in Settings for cloud storage.\n', style: AppStyles.standardText),
             ],
           ),
         ),
@@ -332,32 +318,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             const Text(
               'Map Photo App',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: AppStyles.largeTitle,
             ),
-            const Text('Version 1.0.0\n'),
+            const Text('Version 1.0.0\n', style: AppStyles.standardText),
             
             const Text(
               'A simple and elegant way to capture and organize your photos on a map. Perfect for travel memories, location scouting, and documenting your adventures.\n',
+              style: AppStyles.standardText,
             ),
             
-            const Text('🗺️ Powered by OpenStreetMap'),
-            const Text('📱 Built with Flutter\n'),
+            const Text('🗺️ Powered by OpenStreetMap', style: AppStyles.standardText),
+            const Text('📱 Built with Flutter\n', style: AppStyles.standardText),
             
             const Text(
               'Developer',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: AppStyles.boldTitle,
             ),
-            const Text('Filip Stehlik\n'),
+            const Text('Filip Stehlik\n', style: AppStyles.standardText),
             
             const Text(
               'Features',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: AppStyles.boldTitle,
             ),
-            const Text('• Take photos and place them on map'),
-            const Text('• View photo thumbnails as markers'),
-            const Text('• GPS location support'),
-            const Text('• Local storage with no cloud dependency'),
-            const Text('• Clean, modern interface'),
+            const Text('• Take photos and place them on map', style: AppStyles.standardText),
+            const Text('• View photo thumbnails as markers', style: AppStyles.standardText),
+            const Text('• GPS location support', style: AppStyles.standardText),
+            const Text('• Local storage with no cloud dependency', style: AppStyles.standardText),
+            const Text('• Clean, modern interface', style: AppStyles.standardText),
           ],
         ),
         actions: [
@@ -367,6 +354,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
+    );
+  }
+  
+  void _openDebugScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const DebugScreen()),
     );
   }
 }

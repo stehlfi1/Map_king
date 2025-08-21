@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/photo_marker.dart';
+import '../constants/app_constants.dart';
+import '../styles/app_styles.dart';
 
 class PhotoDetailDialog extends StatefulWidget {
   final PhotoMarker photoMarker;
@@ -43,7 +45,7 @@ class _PhotoDetailDialogState extends State<PhotoDetailDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           AppBar(
-            title: const Text('Photo Details'),
+            title: const Text(AppConstants.photoDetailsTitle),
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
@@ -65,7 +67,7 @@ class _PhotoDetailDialogState extends State<PhotoDetailDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppConstants.standardBorderRadius),
                     child: Image.file(
                       File(_currentMarker.imagePath),
                       width: double.infinity,
@@ -78,7 +80,7 @@ class _PhotoDetailDialogState extends State<PhotoDetailDialog> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.error, size: 50, color: Colors.grey),
+                                Icon(Icons.error, size: AppConstants.extraLargeIconSize, color: Colors.grey),
                                 Text('Image not found'),
                               ],
                             ),
@@ -88,34 +90,28 @@ class _PhotoDetailDialogState extends State<PhotoDetailDialog> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: AppStyles.standardPadding,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (_currentMarker.description != null) ...[
                           const Text(
                             'Description',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                            style: AppStyles.boldTitle,
                           ),
-                          const SizedBox(height: 4),
+                          AppStyles.smallVerticalSpace,
                           Text(
                             _currentMarker.description!,
-                            style: const TextStyle(fontSize: 14),
+                            style: AppStyles.standardText,
                           ),
-                          const SizedBox(height: 16),
+                          AppStyles.mediumVerticalSpace,
                         ],
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
                               'Comment',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                              style: AppStyles.boldTitle,
                             ),
                             IconButton(
                               icon: Icon(_isEditingComment ? Icons.check : Icons.edit),
@@ -129,14 +125,11 @@ class _PhotoDetailDialogState extends State<PhotoDetailDialog> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        AppStyles.smallVerticalSpace,
                         if (_isEditingComment)
                           TextField(
                             controller: _commentController,
-                            decoration: const InputDecoration(
-                              hintText: 'Add a comment...',
-                              border: OutlineInputBorder(),
-                            ),
+                            decoration: AppStyles.commentInputDecoration,
                             maxLines: 3,
                             autofocus: true,
                           )
@@ -149,49 +142,37 @@ class _PhotoDetailDialogState extends State<PhotoDetailDialog> {
                             },
                             child: Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
+                              padding: AppStyles.largePadding,
+                              decoration: AppStyles.commentContainer,
                               child: Text(
                                 _currentMarker.comment?.isEmpty == false 
                                     ? _currentMarker.comment! 
                                     : 'Tap to add a comment...',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: _currentMarker.comment?.isEmpty == false 
-                                      ? Colors.black 
-                                      : Colors.grey.shade600,
-                                ),
+                                style: _currentMarker.comment?.isEmpty == false 
+                                    ? AppStyles.standardText
+                                    : AppStyles.greyText(context),
                               ),
                             ),
                           ),
-                        const SizedBox(height: 16),
+                        AppStyles.mediumVerticalSpace,
                         const Text(
                           'Location',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          style: AppStyles.boldTitle,
                         ),
-                        const SizedBox(height: 4),
+                        AppStyles.smallVerticalSpace,
                         Text(
                           'Lat: ${_currentMarker.latitude.toStringAsFixed(6)}\nLng: ${_currentMarker.longitude.toStringAsFixed(6)}',
-                          style: const TextStyle(fontSize: 14),
+                          style: AppStyles.standardText,
                         ),
-                        const SizedBox(height: 16),
+                        AppStyles.mediumVerticalSpace,
                         const Text(
                           'Taken',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          style: AppStyles.boldTitle,
                         ),
-                        const SizedBox(height: 4),
+                        AppStyles.smallVerticalSpace,
                         Text(
                           _formatDateTime(_currentMarker.timestamp),
-                          style: const TextStyle(fontSize: 14),
+                          style: AppStyles.standardText,
                         ),
                       ],
                     ),
@@ -201,7 +182,7 @@ class _PhotoDetailDialogState extends State<PhotoDetailDialog> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: AppStyles.standardPadding,
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -230,7 +211,7 @@ class _PhotoDetailDialogState extends State<PhotoDetailDialog> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Photo'),
+        title: const Text(AppConstants.deletePhotoTitle),
         content: const Text('Are you sure you want to delete this photo marker? This action cannot be undone.'),
         actions: [
           TextButton(
