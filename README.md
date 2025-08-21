@@ -63,7 +63,7 @@ Works on my machine. May need additional setup depending on your system.
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/stehlfi1/Map_king.git
 cd map_photo_app
 ```
 
